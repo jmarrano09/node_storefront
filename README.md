@@ -6,7 +6,11 @@ This application is an Amazon-like terminal-based "storefront."" It utilizes Nod
 ### Technologies Used
 - [Node.js and npm](https://nodejs.org/en/download/ "Download Node.js and npm"). First, this application relies on both Node.js and npm to download Node packages and to run the application. Users can download the latest versions of both using the link to the left.
 - [MySQL](https://www.mysql.com/ "MySQL") - This application assumes users have both MySQL installed, and the [MySQL npm Package](https://www.npmjs.com/package/mysql "MySQL npm Package") installed as well. 
-- [inquirer](http://numbersapi.com/ "inquirer - npm") - Inquirer is indispensible to this application for providing a more streamlined "UI" than relying on process.argv for user input.
+- [inquirer](http://numbersapi.com/ "inquirer - npm") - Inquirer is required for this application.  If it is not included in the original npm package, then you can download it using
+```
+npm install inquirer 
+```
+- in the terminal.  Inquirer provides the prompts so that the user can respond to the application. 
 - [MySQL Workbench](https://dev.mysql.com/downloads/workbench/ "Download MySQL Workbench") (optional) - A handy visual database design tool that can be useful for creating and mantaining databases. The [Workbench Manual](https://dev.mysql.com/doc/workbench/en/wb-mysql-connections-new.html "To Manual") provides helpful steps for making the initial configuration to use MySQL on your local machine.
 
 ### Downloading This Application
