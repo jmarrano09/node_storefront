@@ -61,5 +61,5 @@ The Supervisor feature allows a user to view sales activity by department, compa
 This feature can be accessed from the terminal with:
 ```
 node bamazonApp.js
-
+```
 

@@ -3,14 +3,14 @@ const inquirer = require("inquirer");
 
 
 var con = sql.createConnection({
-    host: "localhost",
+    host: "local2",
     user: "root",
     port: 3306,
     database: "bamazon"
 });
 
 // connect to the mysql server and sql database
-con.connect(function(err) {
+con.connect(function (err) {
     if (err) throw err;
 });
 
@@ -41,9 +41,9 @@ function promptManagerAction() {
                 }
             }
         }
-    ]).then(function(input) {
+    ]).then(function (input) {
 
-        if (input.option ==='sale') {
+        if (input.option === 'sale') {
             displayInventory();
         } else if (input.option === 'lowInventory') {
             displayLowInventory();
@@ -54,7 +54,7 @@ function promptManagerAction() {
         } else if (input.option === 'newProduct') {
             createNewProduct();
         } else {
-            
+
             console.log('ERROR: Unsupported operation!');
             exit(1);
         }
@@ -63,10 +63,10 @@ function promptManagerAction() {
 
 // shows current inventory from the database 
 function displayInventory() {
-    
+
     queryStr = 'SELECT * FROM products';
 
-    con.query(queryStr, function(err, data) {
+    con.query(queryStr, function (err, data) {
         if (err) throw err;
 
         console.log('Existing Inventory: ');
@@ -93,9 +93,9 @@ function displayInventory() {
 // will display a list of products BELOW 50
 function displayLowInventory() {
 
-    queryStr = 'SELECT * FROM products WHERE stock_quantity < 50';
+    queryStr = 'SELECT * FROM products WHERE stock_quantity <= 50';
 
-    con.query(queryStr, function(err, data) {
+    con.query(queryStr, function (err, data) {
         if (err) throw err;
 
         console.log('Low Inventory Items (below 100): ');
@@ -124,7 +124,7 @@ function displayHighInventory() {
 
     queryStr = 'SELECT * FROM products WHERE stock_quantity > 50';
 
-    con.query(queryStr, function(err, data) {
+    con.query(queryStr, function (err, data) {
         if (err) throw err;
 
         console.log('High Inventory Items (above 50): ');
@@ -192,7 +192,7 @@ function addInventory() {
             validate: validateInteger,
             filter: Number
         }
-    ]).then(function(input) {
+    ]).then(function (input) {
         // console.log('Manager has selected: \n    item_id = '  + input.item_id + '\n    additional quantity = ' + input.quantity);
 
         var item = input.item_id;
@@ -201,7 +201,7 @@ function addInventory() {
         // Query db to confirm that the given item ID exists and to determine the current stock_count
         var queryStr = 'SELECT * FROM products WHERE ?';
 
-        con.query(queryStr, {item_id: item}, function(err, data) {
+        con.query(queryStr, { item_id: item }, function (err, data) {
             if (err) throw err;
 
             // If the user has selected an invalid item ID, data attay will be empty
@@ -220,7 +220,7 @@ function addInventory() {
                 var updateQueryStr = 'UPDATE products SET stock_quantity = ' + (productData.stock_quantity + addQuantity) + ' WHERE item_id = ' + item;
 
                 // Update the inventory
-                con.query(updateQueryStr, function(err, data) {
+                con.query(updateQueryStr, function (err, data) {
                     if (err) throw err;
 
                     console.log('Stock count for Item ID ' + item + ' has been updated to ' + (productData.stock_quantity + addQuantity) + '.');
@@ -235,8 +235,14 @@ function addInventory() {
 
 //  adds a NEW product to the inventory
 function createNewProduct() {
-    
+
     inquirer.prompt([
+        {
+            type: 'input',
+            name: 'item_id',
+            message: 'Please enter the new product ID.',
+            validate: validateNumeric
+        },
         {
             type: 'input',
             name: 'product_name',
@@ -259,27 +265,71 @@ function createNewProduct() {
             message: 'How many items are in stock?',
             validate: validateInteger
         }
-    ]).then(function(input) {
-        // console.log('input: ' + JSON.stringify(input));
+    ]).then(function (input) {
 
-        console.log('Adding New Item: \n    product_name = ' + input.product_name + '\n' +  
-                                       '    department_name = ' + input.department_name + '\n' +  
-                                       '    price = ' + input.price + '\n' +  
-                                       '    stock_quantity = ' + input.stock_quantity);
+        var queryStr = 'SELECT * FROM products WHERE item_id';
 
-        // Create the insertion query string
-        var queryStr = 'INSERT INTO products SET ?';
+        con.query(queryStr, function (err, data) {
+            if (err) throw err;
 
-        // Add new product to the db
-        con.query(queryStr, input, function (error, results, fields) {
-            if (error) throw error;
+            b = 0; // counter 
 
-            console.log('New product has been added to the inventory under Item ID ' + results.insertId + '.');
-            console.log("\n---------------------------------------------------------------------\n");
+            for (i = 0; i < item_id.length; i++) {
+                var current = this[i]; // get a value from the original array
 
-            // End the database connection
-            con.end();
-        });
+                for (j = 0; j < a.length; j++) { // loop and check if value is in new array 
+                    if (current != a[j]) {
+                        b++; // if its not in the new array increase counter
+                    }
+                }
+
+                if (b == a.length) { // if the counter increased on all values 
+                    // then its not in the new array yet
+                    a.push(current); // put it in
+                }
+
+                b = 0; // reset counter
+            }
+
+            return this; // return this to allow method chaining
+
+            // var foundRepeatingValue = false;
+            // for (i = 0; i < list.length; i++) {
+            //     var thisValue = list[i];
+            //     if (i > 0) {
+            //         if (item_id.indexOf(thisValue) > -1) {
+            //             foundRepeatingValue = true;
+            //             console.log("getting repeated");
+            //             return true;
+            //         }
+            //     } newList.push(thisValue);
+            // } return false;
+            if (data.length === 0) {
+                console.log('ERROR: Duplicate Item ID. Please select a new Item ID.');
+                createNewProduct();
+
+            } else {
+                console.log('Adding New Item: \n    product_name = ' + input.product_name + '\n' +
+                    '    item_id = ' + input.item_id + '\n' +
+                    '    department_name = ' + input.department_name + '\n' +
+                    '    price = ' + input.price + '\n' +
+                    '    stock_quantity = ' + input.stock_quantity);
+
+                // Create the insertion query string
+                var queryStr = 'INSERT INTO products SET ?';
+
+                // Add new product to the db
+                con.query(queryStr, input, function (error, results, fields) {
+                    if (error) throw error;
+
+                    console.log('New product has been added to the inventory under Item ID ' + results.insertId + '.');
+                    console.log("\n---------------------------------------------------------------------\n");
+
+                    // End the database connection
+                    con.end();
+                });
+            }
+        })
     })
 }
 

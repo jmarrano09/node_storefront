@@ -3,7 +3,7 @@ const inquirer = require("inquirer");
 
 
 var con = sql.createConnection({
-    host: "localhost",
+    host: "local2",
     user: "root",
     port: 3306,
     database: "bamazon"
